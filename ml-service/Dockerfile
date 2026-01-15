@@ -57,3 +57,24 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
 
 # 启动Nginx（前台运行）
 CMD ["nginx", "-g", "daemon off;"]
+
+# 第四阶段：Python环境 - 用于运行Python应用
+FROM python:3.11-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    gcc \
+    postgresql-client \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+RUN mkdir -p models
+
+EXPOSE 5000
+
+CMD ["python", "app.py"]

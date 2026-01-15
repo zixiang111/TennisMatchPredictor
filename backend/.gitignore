@@ -1,0 +1,38 @@
+target/
+.idea/
+*.iml
+*.class
+*.jar
+.classpath
+.project
+.settings/
+.vscode/
+.DS_Store
+
+# Gradle
+.gradle/
+build/
+gradle-app.setting
+!gradle-wrapper.jar
+.gradletasknamecache
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.project
+.classpath
+.c9/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/

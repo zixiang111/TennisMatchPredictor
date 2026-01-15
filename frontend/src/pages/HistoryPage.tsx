@@ -9,13 +9,18 @@ import {
   CardContent,
   CircularProgress,
   Chip,
-  Divider
+  Divider,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import CancelIcon from '@mui/icons-material/Cancel';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import EqualizerIcon from '@mui/icons-material/Equalizer';
-import HistoricalPredictions from '@/components/HistoricalPredictions';
 import { api } from '@/services/api';
 import type { HistoricalMatch } from '@/types/prediction';
 
@@ -42,9 +47,12 @@ const HistoryPage: React.FC = () => {
     }
   };
 
-  const correctCount = predictions.filter(m => m.correct).length;
+  const correctCount = predictions.filter(m => 
+    m.actual_winner && m.predicted_winner && 
+    m.actual_winner.toLowerCase() === m.predicted_winner.toLowerCase()
+  ).length;
   const totalCount = predictions.length;
-  const accuracy = totalCount > 0 ? ((correctCount / totalCount) * 100).toFixed(1) : 0;
+  const accuracy = totalCount > 0 ? ((correctCount / totalCount) * 100).toFixed(1) : '0';
 
   const StatCard: React.FC<{ icon: React.ReactNode; label: string; value: string | number; color?: string }> = ({
     icon,
@@ -70,6 +78,12 @@ const HistoryPage: React.FC = () => {
       </CardContent>
     </Card>
   );
+
+  const isCorrectPrediction = (match: HistoricalMatch): boolean => {
+    return match.actual_winner 
+      ? match.actual_winner.toLowerCase() === match.predicted_winner.toLowerCase()
+      : false;
+  };
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -153,7 +167,73 @@ const HistoryPage: React.FC = () => {
 
           <Divider sx={{ my: 4 }} />
 
-          <HistoricalPredictions />
+          <Typography variant="h6" sx={{ mb: 2 }}>Recent Predictions</Typography>
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow sx={{ bgcolor: 'grey.100' }}>
+                  <TableCell>Match</TableCell>
+                  <TableCell align="right">Prediction</TableCell>
+                  <TableCell align="right">Confidence</TableCell>
+                  <TableCell align="center">Result</TableCell>
+                  <TableCell>Tournament</TableCell>
+                  <TableCell>Date</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {predictions.map((match) => {
+                  const isCorrect = isCorrectPrediction(match);
+                  return (
+                    <TableRow key={match.id} hover>
+                      <TableCell>
+                        <Typography variant="body2">
+                          {match.player1_name} vs {match.player2_name}
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="right">
+                        <Typography variant="body2" fontWeight="bold">
+                          {match.predicted_winner}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {(match.confidence * 100).toFixed(1)}%
+                        </Typography>
+                      </TableCell>
+                      <TableCell align="right">
+                        <Chip
+                          size="small"
+                          label={`${(match.confidence * 100).toFixed(0)}%`}
+                          variant="outlined"
+                          sx={{
+                            borderColor: match.confidence > 0.7 ? 'success.main' : 'warning.main',
+                            color: match.confidence > 0.7 ? 'success.main' : 'warning.main'
+                          }}
+                        />
+                      </TableCell>
+                      <TableCell align="center">
+                        {match.actual_winner ? (
+                          isCorrect ? (
+                            <CheckCircleIcon color="success" />
+                          ) : (
+                            <CancelIcon color="error" />
+                          )
+                        ) : (
+                          <Typography variant="caption" color="text.secondary">Pending</Typography>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <Chip label={match.tournament} size="small" variant="outlined" />
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="caption">
+                          {new Date(match.created_at).toLocaleDateString()}
+                        </Typography>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
         </>
       )}
     </Container>

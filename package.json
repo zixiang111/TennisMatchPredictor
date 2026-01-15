@@ -7,6 +7,9 @@
     "docker:up": "docker-compose up --build",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",
+    "backend:build": "cd backend && ./gradlew clean build",
+    "backend:run": "cd backend && ./gradlew bootRun",
+    "backend:test": "cd backend && ./gradlew test",
     "frontend:dev": "cd frontend && npm run dev",
     "frontend:build": "cd frontend && npm run build",
     "frontend:preview": "cd frontend && npm run preview"
@@ -16,7 +19,8 @@
     "machine-learning",
     "prediction",
     "xgboost",
-    "react"
+    "react",
+    "gradle"
   ],
   "author": "Your Name",
   "license": "MIT"

@@ -16,59 +16,67 @@ export interface Tournament {
 export type CourtSurface = 'HARD' | 'CLAY' | 'GRASS' | 'CARPET';
 
 export interface PredictionRequest {
-  player1Name: string;
-  player2Name: string;
-  tournament?: string;
-  surface?: CourtSurface;
-  date?: string;
+  player1_name: string;
+  player2_name: string;
+  player1_rank: number;
+  player2_rank: number;
+  player1_points: number;
+  player2_points: number;
+  player1_aces: number;
+  player2_aces: number;
+  player1_breaks: number;
+  player2_breaks: number;
+  player1_first_serve_pct: number;
+  player2_first_serve_pct: number;
+  player1_win_pct_career: number;
+  player2_win_pct_career: number;
+  tournament_name: string;
+  surface: string;
+  round?: string;
+  match_duration_minutes?: number;
+}
+
+export interface EnsemblePrediction {
+  player1_win_prob: number;
+  player2_win_prob: number;
+  favorite: string;
+  confidence: number;
 }
 
 export interface PredictionResponse {
-  predictionId: string;
-  player1Name: string;
-  player2Name: string;
-  player1WinProbability: number;
-  player2WinProbability: number;
-  confidenceLevel: 'HIGH' | 'MEDIUM' | 'LOW';
-  recommendedBet: 'STRONG_WIN' | 'WIN' | 'AVOID' | 'LOSE' | 'STRONG_LOSE';
-  keyFactors: Array<{
-    factor: string;
-    impact: 'POSITIVE' | 'NEGATIVE' | 'NEUTRAL';
-    description: string;
+  player1_name: string;
+  player2_name: string;
+  predictions: Record<string, {
+    player1_win_prob: number;
+    player2_win_prob: number;
   }>;
-  matchDetails?: {
-    surface: CourtSurface;
-    tournament: string;
-    predictedWinner: string;
-    predictedScore?: string;
-  };
-  timestamp: string;
+  ensemble_prediction: EnsemblePrediction;
 }
 
 export interface HistoricalMatch {
-  id: string;
-  player1: string;
-  player2: string;
-  winner: string;
-  date: string;
+  id: number;
+  player1_name: string;
+  player2_name: string;
+  player1_win_prob: number;
+  player2_win_prob: number;
+  predicted_winner: string;
+  confidence: number;
   tournament: string;
-  surface: CourtSurface;
-  player1WinProbability?: number;
-  actualCorrect: boolean;
+  surface: string;
+  actual_winner?: string;
+  created_at: string;
 }
 
 export interface PlayerStats {
-  playerId: string;
+  id: number;
   name: string;
-  overallWinRate: number;
-  surfaceStats: Record<CourtSurface, {
-    matches: number;
-    wins: number;
-    winRate: number;
-  }>;
-  recentForm: Array<{
-    result: 'WIN' | 'LOSS';
-    opponent: string;
-    date: string;
-  }>;
+  rank: number;
+  points: number;
+  career_titles: number;
+  career_matches: number;
+  career_wins: number;
+  avg_aces_per_match: number;
+  avg_first_serve_pct: number;
+  surface_preferences: string;
+  country: string;
 }

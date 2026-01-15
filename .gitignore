@@ -1,1 +1,45 @@
-node_modules
+# Dependencies
+node_modules/
+venv/
+__pycache__/
+target/
+.m2/
+
+# Build outputs
+dist/
+build/
+*.jar
+*.class
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite3
+
+# Python
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Maven
+.classpath
+.project
+.settings/

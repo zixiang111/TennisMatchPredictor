@@ -1,0 +1,4 @@
+#!/bin/bash
+APP_NAME="Gradle"
+APP_BASE_NAME=$(basename "$0")
+exec gradle "$@"

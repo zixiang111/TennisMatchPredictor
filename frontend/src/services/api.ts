@@ -30,7 +30,6 @@ class TennisPredictorApi {
     );
   }
 
-  // 获取比赛预测
   async getPrediction(request: PredictionRequest): Promise<PredictionResponse> {
     try {
       const response: AxiosResponse<PredictionResponse> = await this.client.post(
@@ -44,7 +43,6 @@ class TennisPredictorApi {
     }
   }
 
-  // 获取历史预测记录
   async getHistoricalPredictions(limit: number = 10): Promise<HistoricalMatch[]> {
     try {
       const response: AxiosResponse<HistoricalMatch[]> = await this.client.get(
@@ -57,7 +55,6 @@ class TennisPredictorApi {
     }
   }
 
-  // 获取球员数据
   async searchPlayers(query: string): Promise<any[]> {
     try {
       const response: AxiosResponse<any[]> = await this.client.get(
@@ -70,7 +67,6 @@ class TennisPredictorApi {
     }
   }
 
-  // 获取球员统计数据
   async getPlayerStats(playerName: string): Promise<PlayerStats> {
     try {
       const response: AxiosResponse<PlayerStats> = await this.client.get(
@@ -83,7 +79,6 @@ class TennisPredictorApi {
     }
   }
 
-  // 获取赛事列表
   async getTournaments(): Promise<Tournament[]> {
     try {
       const response: AxiosResponse<Tournament[]> = await this.client.get('/tournaments');
@@ -94,7 +89,6 @@ class TennisPredictorApi {
     }
   }
 
-  // 获取系统健康状态
   async getHealth(): Promise<{ status: string; services: any }> {
     try {
       const response = await this.client.get('/health');
