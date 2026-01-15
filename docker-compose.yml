@@ -1,0 +1,95 @@
+version: '3.8'
+
+# 定义项目中的所有服务（容器）
+services:
+  # ---------- 1. 数据库服务 ----------
+  postgres-db:
+    image: postgres:15-alpine  # 使用轻量级的PostgreSQL 15镜像
+    container_name: tennis-postgres  # 容器命名，便于识别
+    restart: unless-stopped  # 容器退出时自动重启（除非手动停止）
+    environment:  # 设置数据库环境变量（等同于安装时配置）
+      POSTGRES_DB: tennis_predictor_db
+      POSTGRES_USER: tennis_admin
+      POSTGRES_PASSWORD: secure_password_123  # 请在生产环境中更改此密码！
+    ports:
+      - "5432:5432"  # 将宿主机的5432端口映射到容器的5432端口，方便你用VSCode或客户端连接
+    volumes:
+      - postgres_data:/var/lib/postgresql/data  # 持久化存储数据库文件，防止容器删除后数据丢失
+    networks:
+      - tennis-network  # 将本服务连接到自定义网络，以便服务间相互访问
+    healthcheck:  # 健康检查，确保数据库完全启动后再启动依赖它的服务
+      test: ["CMD-SHELL", "pg_isready -U tennis_admin -d tennis_predictor_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ---------- 2. Spring Boot 后端服务 ----------
+  backend:
+    build: ./backend  # 指定Dockerfile的位置，基于该目录构建镜像
+    container_name: tennis-backend
+    restart: unless-stopped
+    depends_on:  # 依赖关系：确保postgres-db和ml-service先启动
+      postgres-db:
+        condition: service_healthy  # 等待数据库健康检查通过
+      ml-service:
+        condition: service_started
+    environment:
+      # 关键配置：通过服务名（postgres-db）连接数据库，这是Docker网络内的内部DNS
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres-db:5432/tennis_predictor_db
+      SPRING_DATASOURCE_USERNAME: tennis_admin
+      SPRING_DATASOURCE_PASSWORD: secure_password_123
+      # 连接机器学习服务的地址
+      ML_SERVICE_URL: http://ml-service:8000
+    ports:
+      - "8080:8080"  # 将后端API暴露给宿主机（浏览器、前端能访问）
+    networks:
+      - tennis-network
+    # 开发时，可以将本地代码目录挂载到容器，实现代码热更新（需配合Gradle bootRun）
+    # volumes:
+    #   - ./backend:/app
+
+  # ---------- 3. Python 机器学习服务 ----------
+  ml-service:
+    build: ./ml-service
+    container_name: tennis-ml-service
+    restart: unless-stopped
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+    environment:
+      DB_CONNECTION_STRING: postgresql://tennis_admin:secure_password_123@postgres-db:5432/tennis_predictor_db
+    ports:
+      - "8000:8000"  # 暴露FastAPI的文档界面，方便测试（http://localhost:8000/docs）
+    volumes:
+      # 挂载模型目录，使训练好的模型持久化
+      - ml_models:/app/models
+      # 开发时挂载代码目录
+      # - ./ml-service:/app
+    networks:
+      - tennis-network
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload  # 启动命令，--reload用于开发热重载
+
+  # ---------- 4. React 前端服务 ----------
+  frontend:
+    build: ./frontend
+    container_name: tennis-frontend
+    restart: unless-stopped
+    depends_on:
+      - backend  # 前端依赖后端API
+    ports:
+      - "3000:3000"  # 暴露前端开发服务器
+    networks:
+      - tennis-network
+    # 通常前端在构建时注入后端API地址，这里可以通过构建参数或环境变量传递
+    # environment:
+    #   REACT_APP_API_URL: http://backend:8080/api
+
+# 声明持久化数据卷，确保数据在容器生命周期之外依然存在
+volumes:
+  postgres_data:
+  ml_models:
+
+# 声明一个自定义的桥接网络，让所有服务在隔离的局域网内通信
+networks:
+  tennis-network:
+    driver: bridge
