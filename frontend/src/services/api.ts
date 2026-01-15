@@ -15,18 +15,26 @@ class TennisPredictorApi {
   constructor() {
     this.client = axios.create({
       baseURL: API_BASE_URL,
-      timeout: 10000,
+      timeout: 15000,
       headers: {
         'Content-Type': 'application/json',
       },
     });
+    
+    this.client.interceptors.response.use(
+      response => response,
+      error => {
+        console.error('API Error:', error);
+        return Promise.reject(error);
+      }
+    );
   }
 
   // 获取比赛预测
   async getPrediction(request: PredictionRequest): Promise<PredictionResponse> {
     try {
       const response: AxiosResponse<PredictionResponse> = await this.client.post(
-        '/predict',
+        '/predictions',
         request
       );
       return response.data;
@@ -100,7 +108,7 @@ class TennisPredictorApi {
   private handleError(error: any): Error {
     if (axios.isAxiosError(error)) {
       if (error.response) {
-        return new Error(`API Error: ${error.response.status} - ${error.response.data?.message || 'Unknown error'}`);
+        return new Error(`API Error: ${error.response.status} - ${error.response.data?.error || 'Unknown error'}`);
       } else if (error.request) {
         return new Error('Network error - Please check your connection');
       }

@@ -1,9 +1,23 @@
 {
-  "dependencies": {
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3"
+  "name": "tennis-match-predictor",
+  "version": "1.0.0",
+  "description": "Full-stack ML application for tennis match prediction",
+  "private": true,
+  "scripts": {
+    "docker:up": "docker-compose up --build",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f",
+    "frontend:dev": "cd frontend && npm run dev",
+    "frontend:build": "cd frontend && npm run build",
+    "frontend:preview": "cd frontend && npm run preview"
   },
-  "devDependencies": {
-    "vite": "^7.3.1"
-  }
+  "keywords": [
+    "tennis",
+    "machine-learning",
+    "prediction",
+    "xgboost",
+    "react"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
 }
